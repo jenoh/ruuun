@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+
+  ruuun:
+    container_name: ruuun
+    image: rustlang/rust:nightly
+    build:
+        context: ./
+    volumes:
+      - ./:/app
+      - /app/target
+    ports:
+      - "8080:8080"

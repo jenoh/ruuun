@@ -16,3 +16,4 @@ env_logger = "0.9.1"
 actix-session = { version = "0.7", features = ["redis-actor-session"] }
 actix-web = "4"
 actix-redis = "0.7.0"
+serde_urlencoded = "0.7.1"

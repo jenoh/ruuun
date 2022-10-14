@@ -27,3 +27,25 @@ pub async fn oauth_token(
 
     Ok(athlete)
 }
+
+pub async fn subscriptions(
+    strava_client_id: String,
+    strava_client_secret: String,
+    callback_url: String,
+    verify_token: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let post_subscriptions = model::PostSubscriptions::PostSubscriptions {
+        client_id: strava_client_id,
+        client_secret: strava_client_secret,
+        callback_url: callback_url,
+        verify_token: verify_token,
+    };
+
+    reqwest::Client::new()
+        .post("https://www.strava.com/api/v3/push_subscriptions")
+        .json(&post_subscriptions)
+        .send()
+        .await?;
+
+    Ok(())
+}

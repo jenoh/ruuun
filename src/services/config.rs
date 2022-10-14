@@ -7,3 +7,6 @@ pub fn get_strava_client_id() -> String {
 pub fn get_strava_client_secret() -> String {
     return env::var("STRAVA_CLIENT_SECRET").unwrap();
 }
+pub fn get_url_webhook() -> String {
+    return env::var("URL_WEBHOOK").unwrap();
+}

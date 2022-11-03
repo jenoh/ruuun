@@ -78,7 +78,7 @@ pub async fn get_code(
         services::config::get_strava_client_id(),
         services::config::get_strava_client_secret(),
         services::config::get_url_webhook(),
-        "toto".to_string(),
+        "verify_token".to_string(),
     )
     .await?;
     Ok(HttpResponse::Ok().body("OK"))
@@ -87,8 +87,20 @@ pub async fn get_code(
 pub async fn post_webhook(
     _req: HttpRequest,
     json: web::Json<model::FormWebhook::FormWebhook>,
+    pool: web::Data<r2d2::Pool<RedisConnectionManager>>,
 ) -> Result<HttpResponse, Error> {
     info!("Event received, type: {}", json.object_type);
+
+    let mut con_result = pool.get().unwrap();
+    let token: String = con_result.get("access_token").unwrap();
+
+    if json.object_type == "activity" {
+        services::api::put_activity(
+            json.object_id.to_string().clone(),
+            format!("Bearer {}", token.clone()),
+        )
+        .await?;
+    }
 
     Ok(HttpResponse::Ok().body("OK"))
 }

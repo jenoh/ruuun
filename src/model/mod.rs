@@ -6,3 +6,4 @@ pub mod PostOauthToken;
 pub mod PostSubscriptions;
 pub mod ResponseChallenge;
 pub mod ResponseOauthToken;
+pub mod UpdatableActivity;

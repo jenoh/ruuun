@@ -46,6 +46,6 @@ pub async fn subscriptions(
         .json(&post_subscriptions)
         .send()
         .await?;
-
+    info!("Subscription done");
     Ok(())
 }

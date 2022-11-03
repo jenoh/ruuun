@@ -1,16 +1,23 @@
-use actix_session::{storage::RedisActorSessionStore, Session, SessionMiddleware};
+// use actix_session::{storage::RedisActorSessionStore, Session, SessionMiddleware};
 use actix_web::{
     dev::ServiceRequest, get, post, web, App, Error, HttpRequest, HttpResponse, HttpServer,
     Responder, Result,
 };
 use log::info;
+use r2d2_redis::redis::Commands;
+use r2d2_redis::{r2d2, redis, RedisConnectionManager};
+// use redis::Commands;
 use std::env;
-
 mod model;
 mod services;
 
+pub type R2D2Pool = r2d2::Pool<RedisConnectionManager>;
+pub type R2D2Con = r2d2::PooledConnection<RedisConnectionManager>;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let manager = RedisConnectionManager::new("redis://localhost").unwrap();
+    let pool = r2d2::Pool::builder().build(manager).unwrap();
     env_logger::init();
 
     // Get env vars
@@ -23,17 +30,9 @@ async fn main() -> std::io::Result<()> {
         stringify!(strava_client_secret)
     );
 
-    let private_key = actix_web::cookie::Key::generate();
-
     HttpServer::new(move || {
         App::new()
-            .wrap(
-                SessionMiddleware::builder(
-                    RedisActorSessionStore::new("127.0.0.1:6379"),
-                    private_key.clone(),
-                )
-                .build(),
-            )
+            .app_data(web::Data::new(pool.clone()))
             .route("/hello", web::get().to(manual_hello))
             .service(get_code)
             .service(get_webhook)
@@ -49,22 +48,30 @@ async fn manual_hello() -> impl Responder {
 }
 
 #[get("/")]
-pub async fn get_code(_req: HttpRequest, session: Session) -> Result<HttpResponse, Error> {
+pub async fn get_code(
+    _req: HttpRequest,
+    pool: web::Data<r2d2::Pool<RedisConnectionManager>>,
+) -> Result<HttpResponse, Error> {
     let params = web::Query::<model::Params::Params>::from_query(_req.query_string()).unwrap();
     info!("Receiving the code:  {}", params.code);
-    session.insert("code", params.code.clone())?;
-    let code: Option<String> = session.get("code").unwrap_or(None);
+
+    let mut con_result = pool.get().unwrap();
+    let _: String = con_result.set("code", params.code.clone()).unwrap();
     info!("Store the code in redis");
 
     let athlete: model::ResponseOauthToken::ResponseOauthToken = services::auth::oauth_token(
         services::config::get_strava_client_id(),
         services::config::get_strava_client_secret(),
-        code.unwrap(),
+        params.code.clone(),
     )
     .await?;
 
-    session.insert("access_token", athlete.access_token)?;
-    session.insert("refresh_token", athlete.refresh_token)?;
+    let _: String = con_result
+        .set("access_token", athlete.access_token)
+        .unwrap();
+    let _: String = con_result
+        .set("refresh_token", athlete.refresh_token)
+        .unwrap();
     info!("Store access and refresh token in redis");
 
     services::auth::subscriptions(

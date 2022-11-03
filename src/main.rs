@@ -23,11 +23,13 @@ async fn main() -> std::io::Result<()> {
     // Get env vars
     let strava_client_id: String = env::var("STRAVA_CLIENT_ID").unwrap();
     let strava_client_secret: String = env::var("STRAVA_CLIENT_SECRET").unwrap();
+    let strava_verify_token: String = env::var("VERIFY_TOKEN").unwrap();
 
     info!(
-        "Get env vars: {}, {}",
+        "Get env vars: {}, {}, {}",
         stringify!(strava_client_id),
-        stringify!(strava_client_secret)
+        stringify!(strava_client_secret),
+        stringify!(strava_verify_token)
     );
 
     HttpServer::new(move || {
@@ -78,7 +80,7 @@ pub async fn get_code(
         services::config::get_strava_client_id(),
         services::config::get_strava_client_secret(),
         services::config::get_url_webhook(),
-        "verify_token".to_string(),
+        services::config::get_verify_token(),
     )
     .await?;
     Ok(HttpResponse::Ok().body("OK"))
@@ -89,15 +91,25 @@ pub async fn post_webhook(
     json: web::Json<model::FormWebhook::FormWebhook>,
     pool: web::Data<r2d2::Pool<RedisConnectionManager>>,
 ) -> Result<HttpResponse, Error> {
-    info!("Event received, type: {}", json.object_type);
+    info!(
+        "Event received, type: {}, id: {}",
+        json.object_type, json.object_id
+    );
 
     let mut con_result = pool.get().unwrap();
     let token: String = con_result.get("access_token").unwrap();
 
     if json.object_type == "activity" {
+        let activity: model::ResponseActivity::ResponseActivity = services::api::get_activity(
+            json.object_id.to_string().clone(),
+            format!("Bearer {}", token.clone()),
+        )
+        .await?;
         services::api::put_activity(
             json.object_id.to_string().clone(),
             format!("Bearer {}", token.clone()),
+            activity.distance.clone(),
+            // activity.moving_time.clone(),
         )
         .await?;
     }

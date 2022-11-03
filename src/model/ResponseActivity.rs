@@ -1,26 +1,26 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ResponseActivity {
-    pub resource_state: i64,
-    pub external_id: String,
-    pub upload_id: i64,
+    pub resource_state: Option<i64>,
     pub athlete: Athlete,
     pub name: String,
-    pub distance: i64,
+    pub distance: f64,
     pub moving_time: i64,
     pub elapsed_time: i64,
     pub total_elevation_gain: i64,
     #[serde(rename = "type")]
     pub type_field: String,
     pub sport_type: String,
+    pub workout_type: Option<String>,
+    pub id: i64,
     pub start_date: String,
     pub start_date_local: String,
     pub timezone: String,
-    pub utc_offset: i64,
-    pub start_latlng: Vec<f64>,
-    pub end_latlng: Vec<f64>,
+    pub utc_offset: f64,
+    pub location_city: Option<String>,
+    pub location_state: Option<String>,
+    pub location_country: String,
     pub achievement_count: i64,
     pub kudos_count: i64,
     pub comment_count: i64,
@@ -31,40 +31,34 @@ pub struct ResponseActivity {
     pub commute: bool,
     pub manual: bool,
     pub private: bool,
+    pub visibility: String,
     pub flagged: bool,
-    pub gear_id: String,
-    pub from_accepted_tag: bool,
+    pub gear_id: Option<String>,
+    pub start_latlng: Vec<String>,
+    pub end_latlng: Vec<String>,
     pub average_speed: f64,
-    pub max_speed: f64,
-    pub average_cadence: f64,
-    pub average_temp: i64,
-    pub average_watts: f64,
-    pub weighted_average_watts: i64,
-    pub kilojoules: f64,
-    pub device_watts: bool,
+    pub max_speed: i64,
     pub has_heartrate: bool,
-    pub max_watts: i64,
-    pub elev_high: f64,
-    pub elev_low: f64,
+    pub heartrate_opt_out: bool,
+    pub display_hide_heartrate_option: bool,
+    pub upload_id: Option<String>,
+    pub external_id: Option<String>,
+    pub from_accepted_tag: bool,
     pub pr_count: i64,
     pub total_photo_count: i64,
     pub has_kudoed: bool,
-    pub workout_type: i64,
-    pub suffer_score: Value,
     pub description: String,
     pub calories: f64,
-    pub segment_efforts: Vec<SegmentEffort>,
-    pub splits_metric: Vec<SplitsMetric>,
-    pub laps: Vec<Lap>,
-    pub gear: Gear,
-    pub partner_brand_tag: Value,
+    pub perceived_exertion: Option<String>,
+    pub prefer_perceived_exertion: Option<String>,
+    pub segment_efforts: Vec<String>,
+    pub best_efforts: Vec<String>,
     pub photos: Photos,
-    pub highlighted_kudosers: Vec<HighlightedKudoser>,
-    pub hide_from_home: bool,
-    pub device_name: String,
+    pub stats_visibility: Vec<StatsVisibility>,
+    pub hide_from_home: Option<bool>,
     pub embed_token: String,
-    pub segment_leaderboard_opt_out: bool,
-    pub leaderboard_opt_out: bool,
+    pub similar_activities: SimilarActivities,
+    pub available_zones: Vec<String>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -82,146 +76,37 @@ pub struct Map {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SegmentEffort {
-    pub id: i64,
-    pub resource_state: i64,
-    pub name: String,
-    pub activity: Activity,
-    pub athlete: Athlete2,
-    pub elapsed_time: i64,
-    pub moving_time: i64,
-    pub start_date: String,
-    pub start_date_local: String,
-    pub distance: f64,
-    pub start_index: i64,
-    pub end_index: i64,
-    pub average_cadence: f64,
-    pub device_watts: bool,
-    pub average_watts: f64,
-    pub segment: Segment,
-    pub kom_rank: Value,
-    pub pr_rank: Value,
-    pub achievements: Vec<Value>,
-    pub hidden: bool,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Activity {
-    pub id: i64,
-    pub resource_state: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Athlete2 {
-    pub id: i64,
-    pub resource_state: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Segment {
-    pub id: i64,
-    pub resource_state: i64,
-    pub name: String,
-    pub activity_type: String,
-    pub distance: f64,
-    pub average_grade: f64,
-    pub maximum_grade: f64,
-    pub elevation_high: f64,
-    pub elevation_low: f64,
-    pub start_latlng: Vec<f64>,
-    pub end_latlng: Vec<f64>,
-    pub climb_category: i64,
-    pub city: String,
-    pub state: String,
-    pub country: String,
-    pub private: bool,
-    pub hazardous: bool,
-    pub starred: bool,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SplitsMetric {
-    pub distance: f64,
-    pub elapsed_time: i64,
-    pub elevation_difference: f64,
-    pub moving_time: i64,
-    pub split: i64,
-    pub average_speed: f64,
-    pub pace_zone: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Lap {
-    pub id: i64,
-    pub resource_state: i64,
-    pub name: String,
-    pub activity: Activity2,
-    pub athlete: Athlete3,
-    pub elapsed_time: i64,
-    pub moving_time: i64,
-    pub start_date: String,
-    pub start_date_local: String,
-    pub distance: f64,
-    pub start_index: i64,
-    pub end_index: i64,
-    pub total_elevation_gain: i64,
-    pub average_speed: f64,
-    pub max_speed: f64,
-    pub average_cadence: f64,
-    pub device_watts: bool,
-    pub average_watts: f64,
-    pub lap_index: i64,
-    pub split: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Activity2 {
-    pub id: i64,
-    pub resource_state: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Athlete3 {
-    pub id: i64,
-    pub resource_state: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Gear {
-    pub id: String,
-    pub primary: bool,
-    pub name: String,
-    pub resource_state: i64,
-    pub distance: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Photos {
-    pub primary: Primary,
-    pub use_primary_photo: bool,
+    pub primary: Option<String>,
     pub count: i64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Primary {
-    pub id: Value,
-    pub unique_id: String,
-    pub urls: Urls,
-    pub source: i64,
+pub struct StatsVisibility {
+    #[serde(rename = "type")]
+    pub type_field: String,
+    pub visibility: String,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Urls {
-    #[serde(rename = "100")]
-    pub n100: String,
-    #[serde(rename = "600")]
-    pub n600: String,
+pub struct SimilarActivities {
+    pub effort_count: i64,
+    pub average_speed: i64,
+    pub min_average_speed: i64,
+    pub mid_average_speed: i64,
+    pub max_average_speed: i64,
+    pub pr_rank: Option<String>,
+    pub frequency_milestone: Option<String>,
+    pub trend: Trend,
+    pub resource_state: i64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct HighlightedKudoser {
-    pub destination_url: String,
-    pub display_name: String,
-    pub avatar_url: String,
-    pub show_name: bool,
+pub struct Trend {
+    pub speeds: Vec<String>,
+    pub current_activity_index: Option<String>,
+    pub min_speed: i64,
+    pub mid_speed: i64,
+    pub max_speed: i64,
+    pub direction: i64,
 }

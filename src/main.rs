@@ -23,7 +23,7 @@ async fn main() -> std::io::Result<()> {
     let strava_client_secret: String = env::var("STRAVA_CLIENT_SECRET").unwrap();
     let strava_verify_token: String = env::var("VERIFY_TOKEN").unwrap();
     let redis_url: String = env::var("REDIS_URL").unwrap();
-    let port: u16 = env::var("PORT").unwrap().parse().unwrap();
+    let port: u16 = env::var("RUUUN_PORT").unwrap().parse().unwrap();
 
     let manager = RedisConnectionManager::new(redis_url).unwrap();
     let pool = r2d2::Pool::builder().build(manager).unwrap();
